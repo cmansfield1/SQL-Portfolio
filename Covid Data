@@ -2,6 +2,11 @@
 --Source https://ourworldindata.org/covid-deaths
 --Queried using: BigQuery
 
+<style>
+blue {
+  color:lightblue;
+}
 
+<blue>hi</blue>
 
 
