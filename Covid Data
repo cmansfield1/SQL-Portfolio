@@ -1,1 +1,36 @@
+--Dataset: Coronavirus (COVID-19) Deaths
+--Source https://ourworldindata.org/covid-deaths
+-- Queried using: BigQuery
 
+--Total Cases VS Population
+
+SELECT location, date, population, total_cases, (total_cases/population)*100 as PercentageInfected
+FROM 'Project.Portfolio.CovidDeaths'
+WHERE locations = 'Canada'
+ORDER BY 1,2
+
+--Which Country had the Highest Death Count?
+
+SELECT locations, MAX(cast(total_deaths as int)) as TotalDeathCOunt
+FROM 'Project.Portfolio.CovidDeaths'
+WHERE continent is not null
+GROUP BY location
+ORDER BY TotalDeathCount DESC
+
+
+-- Population vs Vaccination 
+
+With PopvsVac(Location, Date, Population, New_vaccinations, RollingPeopleVaccinated)
+as
+(
+SELECT  dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(cast(vac.new_vaccinations as int)) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.date) as RollingPeopleVaccinated,
+(RollingPeopleVaccinated/population)*100
+FROM `Project.Portfolio.CovidDeaths` dea
+JOIN `Project.Portfolio.CovidVaccinations` vac
+  On dea.location = vac.location
+  and dea.date = vac.date
+WHERE dea.continent is not null
+--ORDER BY 2,3
+)
+SELECT *, (RollingPeopleVaccinated/Population)*100
+FROM PopvsVac
